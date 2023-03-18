@@ -10,7 +10,8 @@ from PySide6.QtCore import *
 
 
 from . import everything_utils
-from .ui import ui_main, ui_dialog
+from . import ui
+
 
 
 def open_paths_in_everything(paths: list[Path]):
@@ -40,7 +41,7 @@ class ResultDialog(QDialog):
     def __init__(self, parent, file_paths: list[Path]) -> None:
         super().__init__(parent, Qt.WindowType.Dialog)
         self.file_paths = file_paths
-        self.ui = ui_dialog.Ui_Dialog()
+        self.ui = ui.Ui_Dialog()
         self.ui.setupUi(self)
 
         for path in self.file_paths:
@@ -85,7 +86,13 @@ class ResultDialog(QDialog):
             item.setSelected(False)
 
     def copy_To_Clipboard(self):
-        pyperclip.copy(self.getFilePathsFromListBox(True))
+        #copy all lines to clipboard
+        lines=[]
+        for i in range(self.ui.listbox.count()):
+            lines.append(self.ui.listbox.item(i).text())
+
+        x="\n".join(lines)
+        pyperclip.copy(x)
 
     @Slot()
     def open_all_in_everything(self):
@@ -101,7 +108,7 @@ class ResultDialog(QDialog):
 class MainWindow(QMainWindow):
     def __init__(self):
         super(MainWindow, self).__init__()
-        self.ui = ui_main.Ui_MainWindow()
+        self.ui = ui.Ui_MainWindow()
         self.ui.setupUi(self)
         self.setWindowTitle("Extract Parent Paths")
         self.show()
@@ -123,7 +130,10 @@ class MainWindow(QMainWindow):
 
     def getFilePathsFromTextBox(self):
         paths = []
-        for path in map(Path, self.ui.inputbox.toPlainText().splitlines()):
+        for line in self.ui.inputbox.toPlainText().splitlines():
+            if line[0]=="\"" and line[-1]=="\"":
+                line= line[1:-1]
+            path=Path(line)
             if path.exists():
                 paths.append(path)
         return paths
