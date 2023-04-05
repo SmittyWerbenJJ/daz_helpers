@@ -1,0 +1,4 @@
+<DAZInstallManifest VERSION="0.1">
+    <GlobalID VALUE="{}" />
+    <File TARGET="Content" ACTION="Install" VALUE="{}" />
+</DAZInstallManifest>

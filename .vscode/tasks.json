@@ -1,0 +1,18 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build With PyInstaller",
+            "type": "shell",
+            "command": "conda activate ./.venv && pyinstaller --onefile --noconsole -y --icon=\"icons/icon.ico\" --name=\"DAZ Helperas\" __main__.py",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        }
+    ]
+}

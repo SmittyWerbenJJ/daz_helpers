@@ -1,0 +1,41 @@
+altgraph==0.17.3
+attrs==22.2.0
+black @ file:///C:/ci/black_1660221726201/work
+Brotli==1.0.9
+certifi @ file:///C:/b/abs_85o_6fm0se/croot/certifi_1671487778835/work/certifi
+click @ file:///C:/ci/click_1646056762388/work
+colorama @ file:///C:/b/abs_a9ozq0l032/croot/colorama_1672387194846/work
+exceptiongroup==1.1.1
+inflate64==0.3.1
+iniconfig==2.0.0
+multivolumefile==0.2.3
+mypy-extensions==0.4.3
+numpy==1.24.2
+packaging==23.0
+pandas==1.5.3
+pathspec @ file:///C:/b/abs_9cu5_2yb3i/croot/pathspec_1674681579249/work
+pefile==2023.2.7
+Pillow==9.4.0
+platformdirs @ file:///C:/b/abs_73cc5cz_1u/croots/recipe/platformdirs_1662711386458/work
+pluggy==1.0.0
+psutil==5.9.4
+py7zr==0.20.4
+pybcj==1.0.1
+pycryptodomex==3.17
+pyinstaller==5.9.0
+pyinstaller-hooks-contrib==2023.1
+pyppmd==1.0.0
+pytest==7.2.2
+python-dateutil==2.8.2
+pytz==2022.7.1
+pywin32-ctypes==0.2.0
+pyzstd==0.15.4
+Send2Trash==1.8.0
+six==1.16.0
+texttable==1.6.7
+tomli @ file:///C:/Windows/TEMP/abs_ac109f85-a7b3-4b4d-bcfd-52622eceddf0hy332ojo/croots/recipe/tomli_1657175513137/work
+wincertstore==0.2
+wsproto==1.2.0
+wxPython==4.2.0
+yarl==1.8.2
+zope.interface==5.5.2
