@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ContentDBInstall VERSION="1.0">
+  <Products>
+    <Product VALUE="{}">
+      <StoreID VALUE="Daz_IMC" />
+      <ProductToken VALUE="{}" />
+      <GlobalID VALUE="{}" />
+    </Product>
+  </Products>
+</ContentDBInstall>

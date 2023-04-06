@@ -13,3 +13,5 @@ wsproto==1.2.0
 yarl==1.8.2
 zope.event==4.6
 zope.interface==5.5.2
+wxPython==4.2.0
+Send2Trash==1.8.0
