@@ -23,4 +23,4 @@ Promo images of your product that you put in root- or the contentfolder, will be
 
 ---
 ### Extract parents
-This tool will give you the parent paths of any given file/folder paths. You also can open the results in [Everything], (https://www.voidtools.com/), or  them to the clipboard
+This tool will give you the parent paths of any given file/folder paths. You also can open the results in [Everything](https://www.voidtools.com/), or  them to the clipboard
