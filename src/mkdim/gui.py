@@ -96,88 +96,51 @@ class ProgressDialog ( wx.Dialog ):
 		self.m_panel6 = wx.Panel( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
 		bSizer38 = wx.BoxSizer( wx.VERTICAL )
 
-		self.m_panel7 = wx.Panel( self.m_panel6, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
 		bSizer42 = wx.BoxSizer( wx.VERTICAL )
 
-		bSizer11 = wx.BoxSizer( wx.HORIZONTAL )
+		bSizer11 = wx.BoxSizer( wx.VERTICAL )
 
 		bSizer11.SetMinSize( wx.Size( 200,-1 ) )
-		self.spinner = wx.ActivityIndicator(self.m_panel7)
-		bSizer11.Add( self.spinner, 0, wx.ALL|wx.EXPAND, 5 )
+		self.m_caption = wx.StaticText( self.m_panel6, wx.ID_ANY, u"Processing ...", wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_caption.Wrap( -1 )
 
-		self.m_label_Processing = wx.StaticText( self.m_panel7, wx.ID_ANY, u"Processing ...", wx.DefaultPosition, wx.DefaultSize, 0 )
-		self.m_label_Processing.Wrap( -1 )
+		bSizer11.Add( self.m_caption, 0, wx.ALL|wx.EXPAND, 5 )
 
-		bSizer11.Add( self.m_label_Processing, 1, wx.ALL, 5 )
-
-		self.m_label_progress = wx.StaticText( self.m_panel7, wx.ID_ANY, u"001 / 500", wx.DefaultPosition, wx.Size( -1,-1 ), 0 )
+		self.m_label_progress = wx.StaticText( self.m_panel6, wx.ID_ANY, u"001 / 500", wx.DefaultPosition, wx.Size( -1,-1 ), 0 )
 		self.m_label_progress.Wrap( -1 )
 
-		bSizer11.Add( self.m_label_progress, 0, wx.ALL, 5 )
+		bSizer11.Add( self.m_label_progress, 0, wx.ALL|wx.EXPAND, 5 )
+
+		self.m_progressbar = wx.Gauge( self.m_panel6, wx.ID_ANY, 100, wx.DefaultPosition, wx.DefaultSize, wx.GA_HORIZONTAL )
+		self.m_progressbar.SetValue( 0 )
+		bSizer11.Add( self.m_progressbar, 0, wx.ALL|wx.EXPAND, 5 )
 
 
 		bSizer42.Add( bSizer11, 1, wx.EXPAND, 5 )
 
-		self.m_label_progress_CurrentPackage = wx.StaticText( self.m_panel7, wx.ID_ANY, u"Package.001-Package.001Package.001Package.001", wx.DefaultPosition, wx.DefaultSize, 0 )
-		self.m_label_progress_CurrentPackage.Wrap( -1 )
 
-		bSizer42.Add( self.m_label_progress_CurrentPackage, 1, wx.ALL|wx.EXPAND, 5 )
+		bSizer38.Add( bSizer42, 1, wx.EXPAND, 5 )
 
-		self.m_gauge_progress = wx.Gauge( self.m_panel7, wx.ID_ANY, 100, wx.DefaultPosition, wx.DefaultSize, wx.GA_HORIZONTAL )
-		self.m_gauge_progress.SetValue( 0 )
-		bSizer42.Add( self.m_gauge_progress, 0, wx.ALL|wx.EXPAND, 5 )
+		bSizer111 = wx.BoxSizer( wx.VERTICAL )
 
-
-		self.m_panel7.SetSizer( bSizer42 )
-		self.m_panel7.Layout()
-		bSizer42.Fit( self.m_panel7 )
-		bSizer38.Add( self.m_panel7, 0, wx.EXPAND |wx.ALL, 5 )
-
-		self.m_collapsiblePane1 = wx.CollapsiblePane( self.m_panel6, wx.ID_ANY, u"collapsible", wx.DefaultPosition, wx.DefaultSize, wx.CP_DEFAULT_STYLE )
-		self.m_collapsiblePane1.Collapse( True )
-
-		bSizer67 = wx.BoxSizer( wx.VERTICAL )
-
-		self.m_panel8 = wx.Panel( self.m_collapsiblePane1.GetPane(), wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
-		bSizer12 = wx.BoxSizer( wx.VERTICAL )
-
-		self.m_radio_progress1 = wx.RadioButton( self.m_panel8, wx.ID_ANY, u"RadioBtn", wx.DefaultPosition, wx.DefaultSize, 0 )
-		self.m_radio_progress1.Enable( False )
-
-		bSizer12.Add( self.m_radio_progress1, 0, wx.ALL|wx.EXPAND, 5 )
-
-		self.m_radio_progress2 = wx.RadioButton( self.m_panel8, wx.ID_ANY, u"RadioBtn", wx.DefaultPosition, wx.DefaultSize, 0 )
-		self.m_radio_progress2.Enable( False )
-
-		bSizer12.Add( self.m_radio_progress2, 0, wx.ALL|wx.EXPAND, 5 )
-
-		self.m_radio_progress3 = wx.RadioButton( self.m_panel8, wx.ID_ANY, u"RadioBtn", wx.DefaultPosition, wx.DefaultSize, 0 )
-		self.m_radio_progress3.Enable( False )
-
-		bSizer12.Add( self.m_radio_progress3, 0, wx.ALL|wx.EXPAND, 5 )
-
-		self.m_radio_progress4 = wx.RadioButton( self.m_panel8, wx.ID_ANY, u"RadioBtn", wx.DefaultPosition, wx.DefaultSize, 0 )
-		self.m_radio_progress4.Enable( False )
-
-		bSizer12.Add( self.m_radio_progress4, 0, wx.ALL|wx.EXPAND, 5 )
+		self.m_textbox = wx.TextCtrl( self.m_panel6, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.Size( 300,200 ), wx.TE_MULTILINE|wx.TE_READONLY )
+		bSizer111.Add( self.m_textbox, 1, wx.ALL|wx.EXPAND, 5 )
 
 
-		self.m_panel8.SetSizer( bSizer12 )
-		self.m_panel8.Layout()
-		bSizer12.Fit( self.m_panel8 )
-		bSizer67.Add( self.m_panel8, 1, wx.EXPAND |wx.ALL, 5 )
+		bSizer38.Add( bSizer111, 0, wx.EXPAND, 5 )
 
+		m_buttons = wx.StdDialogButtonSizer()
+		self.m_buttonsCancel = wx.Button( self.m_panel6, wx.ID_CANCEL )
+		m_buttons.AddButton( self.m_buttonsCancel )
+		m_buttons.Realize();
 
-		self.m_collapsiblePane1.GetPane().SetSizer( bSizer67 )
-		self.m_collapsiblePane1.GetPane().Layout()
-		bSizer67.Fit( self.m_collapsiblePane1.GetPane() )
-		bSizer38.Add( self.m_collapsiblePane1, 0, wx.ALL|wx.EXPAND, 5 )
+		bSizer38.Add( m_buttons, 0, wx.EXPAND, 5 )
 
 
 		self.m_panel6.SetSizer( bSizer38 )
 		self.m_panel6.Layout()
 		bSizer38.Fit( self.m_panel6 )
-		bSizer33.Add( self.m_panel6, 1, wx.ALL|wx.EXPAND, 0 )
+		bSizer33.Add( self.m_panel6, 1, wx.ALL|wx.EXPAND, 5 )
 
 
 		self.SetSizer( bSizer33 )

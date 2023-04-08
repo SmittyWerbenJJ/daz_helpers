@@ -1,6 +1,7 @@
 from enum import Enum,auto
 
 class MessageType(Enum):
+    START= auto()
     FINISHED_ONE = auto()
     FINISHED_COMPLETELY = auto()
     INFO = auto()

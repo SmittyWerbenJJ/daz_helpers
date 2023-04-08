@@ -27,8 +27,6 @@ class FileDropPanel(gui.panel_MakeDim, wx.FileDropTarget):
         def __init__(self):
             super().__init__()
 
-    parentFrame: wx.Frame = None
-
     def __init__(self, parent):
         super().__init__(parent)
         self.dropTarget = FileDropPanel.DropTarget()
@@ -66,15 +64,15 @@ class FileDropPanel(gui.panel_MakeDim, wx.FileDropTarget):
 
         if len(filepaths) == 0:
             return
-        ProgressDialog(self, "Processing Files...", maximum=len(filepaths))
-
+        dialog = ProgressDialog(self, "Processing Files...", maximum=len(filepaths))
         thread = mkdim.mkdimThread(
-            filepaths, self.dstDirPickerCtrl.GetPath(), ProgressDialog.onReport
+            filepaths, self.dstDirPickerCtrl.GetPath(), dialog.update
         )
         thread.start()
+        dialog.ShowModal()
 
 
-class ProgressDialog(wx.ProgressDialog):
+class ProgressDialog(gui.ProgressDialog):
     instance = None
 
     def __init__(
@@ -83,38 +81,62 @@ class ProgressDialog(wx.ProgressDialog):
         title,
         maximum=100,
     ):
-        super().__init__(title, "", maximum, parent)
+
+        super().__init__(parent)
         ProgressDialog.instance = self
+        self.errorMessages=[]
+        self.current=0
+        self.maxValue=maximum
+        self.m_progressbar.SetRange(maximum)
+        self.current_item=""
 
-    @classmethod
-    def onReport(cls, progressReport: ProgressReport):
-        if ProgressDialog.instance is None:
-            return
-        newValue = ProgressDialog.instance.GetValue()
-        message = ""
+    def update(self, progressReport: ProgressReport):
+        newValue =self.current
         match = progressReport.messageType
+        message=progressReport.message
+        statusMessage=""
+        doShutdown=False
+
+        if match == MessageType.START:
+            self.current_item=progressReport.message
         if match == MessageType.INFO:
-            message = progressReport.message
-
+            statusMessage=progressReport.message
         elif match == MessageType.FINISHED_ONE:
-            message += progressReport.message
-            newValue += 1
+            self.current += 1
         elif match == MessageType.FINISHED_COMPLETELY:
-            ProgressDialog.Shutdown()
+            statusMessage=""
+            doShutdown=True
+        elif match==MessageType.ERROR:
+            self.errorMessages.append(message)
+            statusMessage="ERROR"
 
-        formattedMessage = "[{}/{}] {}".format(
-            min(newValue, ProgressDialog.instance.GetRange()),
-            ProgressDialog.instance.GetRange(),
-            message,
+        formattedProgressLabel="{:03d}/{:03d}".format(
+            self.current,self.maxValue
         )
-        message = formattedMessage
-        ProgressDialog.instance.Update(newValue, message)
 
-    @classmethod
-    def Shutdown(cls):
-        playToastMessage(
-            ProgressDialog.instance,
+        self.m_caption.SetLabel(f"Processing {self.current_item}...")
+        self.m_progressbar.SetValue(newValue)
+        self.m_label_progress.SetLabel(formattedProgressLabel)
+        if statusMessage!="":
+            self.m_textbox.AppendText(statusMessage+"\n")
+
+        if doShutdown:
+            self.m_textbox.AppendText("\n".join(self.errorMessages))
+            self.Shutdown()
+
+    def Shutdown(self):
+        errors=self.errorMessages
+        if len(errors)==0:
+            playToastMessage(
+                self.GetParent(),
+                "Conversion Done",
+                f"Finished Converting {self.GetRange()} items",
+            )
+            self.Destroy()
+        else:
+            playToastMessage(
+            self.GetParent(),
             "Conversion Done",
-            f"Finished Converting {ProgressDialog.instance.GetRange()} items",
-        )
-        ProgressDialog.instance.Destroy()
+            f"Some Errors hav occured during Conversions. 👀",
+            wx.ICON_ERROR
+             )
