@@ -29,3 +29,12 @@ This tool requires 7-zip. Make sure you install the [x64 version of 7-zip](https
 ---
 ### Extract parents
 This tool will give you the parent paths of any given file/folder paths. You also can open the results in [Everything](https://www.voidtools.com/), or  them to the clipboard
+
+
+---
+### building
+
+To Build the Executable  
+create a conda environment with ```conda create --prefix=.\.conda```  
+install pip requirements ```pip install -r requirements.txt```  
+run the batch file ```build.bat```
