@@ -218,7 +218,7 @@ def pack(filepath: str, destinationFolder="", callback_report=None):
         """
         callback_report(
             progressReport.ProgressReport(message).setMessageType(
-                progressReport.MessageType.INFO
+                progressReport.MessageType.ERROR
             )
         )
         return
@@ -269,9 +269,14 @@ class mkdimThread(threading.Thread):
 
     def run(self):
         for filepath in self.filepaths:
+            path=Path(filepath).name
+            report=progressReport.ProgressReport(path)
+            report.setMessageType(progressReport.MessageType.START)
+            self.callback_report(report)
+
             pack(filepath, self.destinationFolder, self.callback_report)
             self.callback_report(
-                progressReport.ProgressReport(Path(filepath).name).setMessageType(
+                progressReport.ProgressReport().setMessageType(
                     progressReport.MessageType.FINISHED_ONE
                 )
             )

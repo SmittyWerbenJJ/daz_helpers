@@ -1,7 +1,7 @@
 import os
 import zipfile
-from zipfile import ZipFile
-
+from . import ziputils
+from . import manifest
 from pathlib import Path
 import hashlib
 import re
@@ -21,7 +21,7 @@ def findProductID(path: Path):
     if match:
         id = int(match.group(0))
     elif is_zipfile:
-        archive = ZipFile(strpath)
+        archive =ziputils.Archive(path)
         for file in archive.namelist():
             if "runtime/support/" in file.casefold() and file.casefold().endswith(".dsx"):
                 dsxText = archive.read(file).decode("utf8")
@@ -131,22 +131,11 @@ def validate_defaultDimStructure(filelist: list[str]):
 
 
 def validate_defaultDazStructure(fileList: list[Path]):
-    rootdirs = [
-        "data",
-        "Runtime",
-        "People",
-        "Scripts",
-        "Shaders",
-        "Presets",
-        "Shader Presets",
-        "Materials",
-    ]
-
-    rootdirs = [str(x).casefold() for x in rootdirs]
+    manifest.getRootDirs()
     fileList = [str(x).casefold() for x in fileList]
 
     for path in fileList:
-        for rootdir in rootdirs:
+        for rootdir in manifest.getRootDirs():
             if path.startswith(rootdir):
                 return True
     return False
@@ -158,39 +147,46 @@ def validate_containsContentFolder(filelist):
     return has
 
 
-def findContentFolder(filelist: list[str]):
+def findContentFolder(filelist: list[Path]):
     contentFolders=[]
 
     for filepath in filelist:
-        filepath=Path(filepath)
         casefolded=str(filepath.as_posix()).casefold()
         if "content/" in casefolded:
             contentFolders.append(filepath)
     commonpath=os.path.commonpath([str(x) for x in contentFolders])
 
-    if "content/" in commonpath.casefold():
-        return Path(commonpath).as_posix()
+    for x in ["content/","/content"]:
+        if x in Path(commonpath.casefold()).as_posix():
+            return Path(commonpath).as_posix()
 
     if len(contentFolders)>0:
         return contentFolders[0].as_posix()[:str(casefolded).index("content/")+8]
     return None
 
+def remove_special_chars(string):
+    new_string_arr = []
+    for char in string:
+        if char.isalnum():
+            new_string_arr.append(char)
+    return "".join(new_string_arr)
+
 class Archivedata:
     def __init__(self, archivePath: Path) -> None:
         self.path = archivePath
-        self.isArchive = zipfile.is_zipfile(self.path)
+        self.isArchive = ziputils.is_zipfile(self.path)
         self.filelist = self.getfilelist()
         self.sourceType = self.validateSource()
         self.productID = findProductID(self.path)
         self.ProductName = findProductName(self.path)
-        self.ProductNameNoSpaces = self.ProductName.replace(" ", "")
+        self.ProductNameNoSpaces = remove_special_chars(self.ProductName)
         self.DsxName = findDsxName(self.productID, self.ProductNameNoSpaces)
         self.zipname = findZipName(self.productID, self.ProductNameNoSpaces)
         self.destinationFolder = ""
         self.archiveHandler=None
 
-    def as_archive(self) -> ZipFile:
-        return ZipFile(self.path, "r")
+    def as_archive(self)-> ziputils.Archive:
+        return ziputils.Archive(self.path)
 
     def as_folder(self) -> Path:
         return Path(self.path)

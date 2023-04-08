@@ -4,10 +4,10 @@ from io import StringIO
 
 template="""\
 <ProductSupplement VERSION="0.1">
-    <ProductName VALUE="{}" />'
+    <ProductName VALUE="{}" />
     <InstallTypes VALUE="Content" />
     <ProductTags VALUE="DAZStudio4_5" />
-</ProductSupplement>'
+</ProductSupplement>
 """
 
 class Supplement:

@@ -2,7 +2,10 @@ A small suite of tools for working with Daz files
 
 ---
 ### mkdim
+
 This tool allows you to Pack files for use with the [Daz Install manager (DIM)](https://www.daz3d.com/install-manager-info).
+
+
 You can drag&drop folders and archives(.zip files) in the ui and the tool will create IM-Files for you.
 Your files should have one of the following file structures:
 ```
@@ -20,6 +23,8 @@ inside the folder or the .zip file, the structure should be one of those:
 \people\Genesis X\whatever\...
 ```
 Promo images of your product that you put in root- or the contentfolder, will be used as thumbnails inside daz studio
+
+This tool requires 7-zip. Make sure you install the [x64 version of 7-zip](https://www.7-zip.org/))
 
 ---
 ### Extract parents

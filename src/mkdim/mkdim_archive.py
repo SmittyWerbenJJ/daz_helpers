@@ -8,6 +8,17 @@ from .mkdim_types import SourceType
 from .archivedata import Archivedata
 from .manifest import Manifest
 from .supplement import Supplement
+
+def clearFolder(folder:Path):
+    for file_path in folder.iterdir():
+        try:
+            if file_path.is_file() or file_path.is_symlink():
+                file_path.unlink()
+            elif file_path.is_dir():
+                shutil.rmtree(file_path)
+        except Exception as e:
+            raise Exception('Failed to delete %s. Reason: %s' % (file_path, e))
+
 class Archive:
     def __init__(self, archivePath: Path) -> None:
         self.source = Archivedata(archivePath)
@@ -28,26 +39,31 @@ class Archive:
         self.source.destinationFolder = Path(self.source.path).parent
 
     def writeFilesToArchive(self,manifest:Manifest):
-        with ZipFile(self.source.getFinalZipPath(), "w") as archive:
-            ziputils.writeToZipfile(archive,"Supplement.dsx", Supplement(self.source.ProductName).toString())
-            ziputils.writeToZipfile(archive,"Manifest.dsx", manifest.toString())
+        """\
+        - extract/move files to temp dir
+        - pack the whole temp dir with new name
+        - clear temp dir
+        """
+        tempdir=self.source.path.parent.joinpath("__tmp__")
+        tempdir.mkdir(parents=True,exist_ok=True)
+        clearFolder(tempdir)
+        tempdir.joinpath("Supplement.dsx").write_text(Supplement(self.source.ProductName).toString())
+        tempdir.joinpath("Manifest.dsx").write_text(manifest.toString())
+        if self.source.isArchive:
+            ziputils.extractWith7zip(self.source.path,tempdir,manifest)
+        else:
+            for entry in manifest.entries:
+                _from=self.source.path.joinpath(entry.sourcePath)
+                _to=tempdir.joinpath(entry.manifestPath)
+                _to.parent.mkdir(exist_ok=True,parents=True)
+                shutil.copy(str(_from),str(_to))
 
-            sourceHandler=self.source.as_archive() if self.source.isArchive else self.source.as_folder()
-            with sourceHandler as sourceArchive:
-                for entry in manifest.entries:
-                    posixpath=entry.sourcePath.as_posix()
-                    if self.source.isArchive:
-                        data=sourceArchive.read(posixpath)
-                    else:
-                        p_path=sourceArchive.joinpath(posixpath)
-                        if not p_path.is_file():
-                            continue
-                        data=p_path.read_bytes()
-                    ziputils.writeToZipfile(
-                        archive,
-                        entry.manifestPath,
-                        data
-                    )
+        # before packing, modify extracted files - rename promo image
+        org_img_name= tempdir / Manifest.supportDir / manifest.promoImage.sourcePath.name
+        new_img_name=manifest.promoImage.manifestPath.name
+        org_img_name.rename(org_img_name.parent /manifest.promoImage.manifestPath.name)
+        ziputils.createZipfileWith7zip(tempdir,self.source.getFinalZipPath())
+        shutil.rmtree(tempdir,ignore_errors=True)
 
     def processArchive(self, destinationFolder="", callback_report=None):
         if callback_report is None:
@@ -98,14 +114,12 @@ class Archive:
                 f"{self.source.path} does not contain valid daz folders!"
             ).setMessageType(progressReport.MessageType.ERROR)
 
-        manifest=Manifest(self.source.filelist,self.source.productID)
-        manifest.findProductImage(self.source.ProductName)
+        manifest=Manifest(self.source.filelist,self.source.productID,self.source.ProductName)
         self.writeFilesToArchive(manifest)
 
     def handleDefaultDAZ(self, callback_report):
         """source has valid daz root paths, put files in content folder,create manifest and support images"""
-        manifest=Manifest(self.source.filelist,self.source.productID)
-        manifest.findProductImage(self.source.ProductName)
+        manifest=Manifest(self.source.filelist,self.source.productID,self.source.ProductName)
         self.writeFilesToArchive(manifest)
 
     def handleDefaultDIM(self, callback_report):
