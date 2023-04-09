@@ -68,10 +68,19 @@ class Manifest:
             else:
                 continue
 
-            if manifestpath.suffix=="":
+            if Manifest.isFileDirectory(file,filelist):
                 continue
 
+
             self.addEntry(file,Path(manifestpath))
+
+    def isFileDirectory(file:Path,filelist:list[Path]):
+        strfile=file.as_posix()
+        for other in [x.as_posix() for x in filelist]:
+            idx= other.find(strfile+"/")
+            if idx>=0:
+                return True
+        return False
 
     def makeContentPath(file:Path):
         posixpath=file.as_posix().casefold()
