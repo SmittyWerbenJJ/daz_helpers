@@ -33,14 +33,21 @@ def createZipfile(folderToZip,newZipFilePath):
     )
 def extractWith7zip(sourceZipfile:Path,target:Path):
     command=f'"{sevenzip}" x "{sourceZipfile}" -o"{target}/"'
-    subprocess.call(command)
+    subprocess.call(
+        command,
+        creationflags=subprocess.CREATE_NO_WINDOW )
+
 
 def createZipfileWith7zip(source:Path,target:Path):
     command=f'"{sevenzip}" a "{target}" .'
     if target.exists():
         target.unlink()
     #cwd argument explained here https://stackoverflow.com/a/21406995
-    subprocess.call(command,cwd=source)
+    subprocess.call(
+        command,
+        cwd=source,
+        creationflags=subprocess.CREATE_NO_WINDOW
+        )
 
 class Archive:
     def __init__(self,path:Path) -> None:
