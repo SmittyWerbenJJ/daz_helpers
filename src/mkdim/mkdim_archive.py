@@ -8,7 +8,7 @@ from .mkdim_types import SourceType
 from .archivedata import Archivedata
 from .manifest import Manifest
 from .supplement import Supplement
-
+import tempfile
 def clearFolder(folder:Path):
     for file_path in folder.iterdir():
         try:
@@ -19,6 +19,14 @@ def clearFolder(folder:Path):
         except Exception as e:
             raise Exception('Failed to delete %s. Reason: %s' % (file_path, e))
 
+def removeFolder(folder:Path):
+    try:
+        os.system(f"rmdir /s /q {folder}")
+    except Exception as e:
+        print(e)
+
+def getNewTenpDir():
+    return Path(tempfile.mkdtemp())
 class Archive:
     def __init__(self, archivePath: Path) -> None:
         self.source = Archivedata(archivePath)
@@ -44,11 +52,9 @@ class Archive:
         - pack the whole temp dir with new name
         - clear temp dir
         """
-        tempdir=self.source.path.parent.joinpath("__tmp__")
-        tempdir.mkdir(parents=True,exist_ok=True)
+        tempdir=getNewTenpDir()
         tmpdir_extract=tempdir.joinpath("extract")
         tmpdir_packme=tempdir.joinpath("packme")
-        clearFolder(tempdir)
         for folder in [tmpdir_packme,tmpdir_extract]:
             folder.mkdir(parents=True,exist_ok=True)
 
@@ -73,10 +79,10 @@ class Archive:
             _from=tmpdir_extract.joinpath(entry.sourcePath)
             _to=tmpdir_packme.joinpath(entry.manifestPath)
             _to.parent.mkdir(parents=True,exist_ok=True)
-            shutil.move(                str(_from),str(_to)            )
+            shutil.move(str(_from),str(_to))
 
         ziputils.createZipfileWith7zip(tmpdir_packme,self.source.getFinalZipPath())
-        shutil.rmtree(tempdir)
+        removeFolder(tempdir)
 
     def processArchive(self, destinationFolder="", callback_report=None):
         if callback_report is None:
