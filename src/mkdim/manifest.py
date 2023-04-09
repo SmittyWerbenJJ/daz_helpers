@@ -22,10 +22,20 @@ def getImageSuffixes():
     return [
     ".tga",".png",".bmp",".jpg",".jpeg",".webm"
     ]
+
+def findRootpath(path:Path):
+    for rootdir in getRootDirs():
+        idx = path.as_posix().casefold().find(rootdir)
+        if idx!=-1:
+            return (idx,rootdir)
+    return (-1,None)
+
+
+
 class ManifestEntry:
     def __init__(self, sourcePath:Path, manifestPath:Path) -> None:
         self.sourcePath = sourcePath
-        self.manifestPath = manifestPath
+        self.manifestPath = Path(manifestPath.as_posix().lstrip("/"))
 
 class Manifest:
     header = '<DAZInstallManifest VERSION="0.1">'
@@ -43,24 +53,46 @@ class Manifest:
 
         #create manifest from source
         for file in filelist:
-            match= re.match(r"(^.*)(content\/)(.*)",file.as_posix(),re.RegexFlag.IGNORECASE)
-
-            if match:
-                manifestpath=Path("C"+(match.group(2)+match.group(3))[1:])
-            elif file.name in getRootDirs():
-                manifestpath=Path("Content/"+file.as_posix())
-            elif file.suffix in getImageSuffixes():
-                self.addPromoImage(file)
-                continue
+            #find content folder
+            contentPath=Manifest.makeContentPath(file)
+            rootDirPath=Manifest.makeRootDirPath(file)
+            promoImgPath=self.makePromoImgPath(file)
+            if contentPath:
+                manifestpath=contentPath
+            elif rootDirPath:
+                manifestpath=rootDirPath
+            elif promoImgPath and not self.promoImage:
+                #can this path be used as promo img?
+                manifestpath=promoImgPath
+                self.promoImage=promoImgPath
             else:
                 continue
 
-            if manifestpath.suffix==(""):
+            if manifestpath.suffix=="":
                 continue
 
             self.addEntry(file,Path(manifestpath))
 
-        # self.entries.sort(key=lambda x: len(x.manifestPath.as_posix()))
+    def makeContentPath(file:Path):
+        posixpath=file.as_posix().casefold()
+        idx=posixpath.rfind("content/")
+        if idx!=-1:
+            return Path(file.as_posix()[idx:])
+        return None
+
+    def makeRootDirPath(file):
+        posixpath=file.as_posix().casefold()
+        for rootdir in getRootDirs():
+            idx = posixpath.find(rootdir)
+            if idx!=-1:
+                return Path("Content/"+file.as_posix()[idx:])
+        return None
+
+
+    def makePromoImgPath(self,file:Path):
+        if file.suffix.casefold() in getImageSuffixes():
+            return Manifest.supportDir.joinpath(Path(self.productName).with_suffix(file.suffix))
+        return None
 
     def addEntry(self, sourcePath, mainfestpath):
         entry=ManifestEntry(sourcePath, mainfestpath)

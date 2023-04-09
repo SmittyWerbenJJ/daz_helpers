@@ -31,14 +31,9 @@ def createZipfile(folderToZip,newZipFilePath):
         root_dir,
         base_dir,
     )
-def extractWith7zip(sourceZipfile:Path,target:Path,manifest:Manifest):
-    with ThreadPoolExecutor() as executor:
-        for entry in manifest.entries:
-            outDir=target.joinpath(entry.manifestPath).parent
-            fileToUnpack=entry.sourcePath
-            command=f'"{sevenzip}" e "{sourceZipfile}" -o"{outDir}/" "{fileToUnpack}"'
-            executor.submit(subprocess.call,command)
-
+def extractWith7zip(sourceZipfile:Path,target:Path):
+    command=f'"{sevenzip}" x "{sourceZipfile}" -o"{target}/"'
+    subprocess.call(command)
 
 def createZipfileWith7zip(source:Path,target:Path):
     command=f'"{sevenzip}" a "{target}" .'

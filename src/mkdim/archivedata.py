@@ -192,10 +192,15 @@ class Archivedata:
         return Path(self.path)
 
     def getfilelist(self):
+        flist=[]
         if self.isArchive:
             return [Path(name) for name in self.as_archive().namelist()]
         else:
-            return [f.relative_to(self.path) for f in self.as_folder().rglob("*")]
+            for f in self.as_folder().rglob("*"):
+                if f.suffix!="":
+                    flist.append(f.relative_to(self.path) )
+
+            return flist
 
     def getContentFolder(self):
         return findContentFolder(self.filelist)

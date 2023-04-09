@@ -46,24 +46,37 @@ class Archive:
         """
         tempdir=self.source.path.parent.joinpath("__tmp__")
         tempdir.mkdir(parents=True,exist_ok=True)
+        tmpdir_extract=tempdir.joinpath("extract")
+        tmpdir_packme=tempdir.joinpath("packme")
         clearFolder(tempdir)
-        tempdir.joinpath("Supplement.dsx").write_text(Supplement(self.source.ProductName).toString())
-        tempdir.joinpath("Manifest.dsx").write_text(manifest.toString())
+        for folder in [tmpdir_packme,tmpdir_extract]:
+            folder.mkdir(parents=True,exist_ok=True)
+
+        #add support/manifest dsx files
+        tmpdir_packme.joinpath("Supplement.dsx").write_text(Supplement(self.source.ProductName).toString())
+        tmpdir_packme.joinpath("Manifest.dsx").write_text(manifest.toString())
+
         if self.source.isArchive:
-            ziputils.extractWith7zip(self.source.path,tempdir,manifest)
+            #extract the archives to tmpdir
+            ziputils.extractWith7zip(self.source.path,tmpdir_extract)
         else:
+            #copy folder content to tmpdir
             for entry in manifest.entries:
                 _from=self.source.path.joinpath(entry.sourcePath)
-                _to=tempdir.joinpath(entry.manifestPath)
+                _to=tmpdir_extract.joinpath(entry.sourcePath)
                 _to.parent.mkdir(exist_ok=True,parents=True)
                 shutil.copy(str(_from),str(_to))
 
-        # before packing, modify extracted files - rename promo image
-        org_img_name= tempdir / Manifest.supportDir / manifest.promoImage.sourcePath.name
-        new_img_name=manifest.promoImage.manifestPath.name
-        org_img_name.rename(org_img_name.parent /manifest.promoImage.manifestPath.name)
-        ziputils.createZipfileWith7zip(tempdir,self.source.getFinalZipPath())
-        shutil.rmtree(tempdir,ignore_errors=True)
+        # before packing, modify extracted files -move files to packdir and rename according to manifest
+        # also rename promo image
+        for entry in manifest.entries:
+            _from=tmpdir_extract.joinpath(entry.sourcePath)
+            _to=tmpdir_packme.joinpath(entry.manifestPath)
+            _to.parent.mkdir(parents=True,exist_ok=True)
+            shutil.move(                str(_from),str(_to)            )
+
+        ziputils.createZipfileWith7zip(tmpdir_packme,self.source.getFinalZipPath())
+        shutil.rmtree(tempdir)
 
     def processArchive(self, destinationFolder="", callback_report=None):
         if callback_report is None:

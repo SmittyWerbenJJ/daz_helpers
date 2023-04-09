@@ -130,7 +130,7 @@ class ProgressDialog(gui.ProgressDialog):
             playToastMessage(
                 self.GetParent(),
                 "Conversion Done",
-                f"Finished Converting {self.GetRange()} items",
+                f"Finished Converting {self.maxValue} items",
             )
             self.Destroy()
         else:
