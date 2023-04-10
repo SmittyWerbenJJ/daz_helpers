@@ -17,6 +17,8 @@ def getRootDirs():
     ]
     return  [str(x).casefold() for x in dirs]
 
+def fix_xml_reference(string):
+   return string.replace("<","&lt;").replace(">","&gt;").replace('"',"&quot;").replace("&","&amp;").replace("'","&apos;")
 
 def getImageSuffixes():
     return [
@@ -40,7 +42,7 @@ class ManifestEntry:
 class Manifest:
     header = '<DAZInstallManifest VERSION="0.1">'
     id_template='<GlobalID VALUE="{}" />'
-    content_template='\t<File TARGET="Content" ACTION="Install" VALUE="{}" />'
+    content_template='  <File TARGET="Content" ACTION="Install" VALUE="{}" />'
     footer='</DAZInstallManifest>'
     supportDir=Path("Content/Runtime/Support/")
 
@@ -138,6 +140,6 @@ class Manifest:
         lines=[self.header,self.id_template.format(guid)]
 
         for entry in self.entries:
-            lines.append(self.content_template.format(entry.manifestPath))
+            lines.append(self.content_template.format(fix_xml_reference(entry.manifestPath.as_posix())))
         lines.append(self.footer)
         return "\n".join(lines)
