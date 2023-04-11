@@ -147,7 +147,7 @@ def validate_containsContentFolder(filelist):
     return has
 
 
-def findContentFolder(filelist: list[Path]):
+def findContentFolder(filelist: list[Path])->str|None:
     contentFolders=[]
 
     for filepath in filelist:
@@ -161,7 +161,8 @@ def findContentFolder(filelist: list[Path]):
             return Path(commonpath).as_posix()
 
     if len(contentFolders)>0:
-        return contentFolders[0].as_posix()[:str(casefolded).index("content/")+8]
+        cDir=contentFolders[0].as_posix()
+        return cDir[:cDir.casefold().index("content/")+8]
     return None
 
 def remove_special_chars(string):
