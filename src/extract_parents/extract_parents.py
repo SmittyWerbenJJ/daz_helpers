@@ -51,10 +51,12 @@ class MainPanel(wx.Panel):
         groupbox.Add(btn_openInEverything,1,wx.ALL|wx.EXPAND,5)
 
     def OnGetParentPath(self,sender):
+        parent_paths=[]
         for path in [Path(getClenedPath(x)) for x in self.textbox.GetValue().splitlines()]:
             if path.exists:
                 parent_paths.append(path.parent)
-        ParentPathsDialog(self, list(map(Path, parent_paths)))
+        if len(parent_paths)>0:
+            ParentPathsDialog(self, parent_paths)
 
 
 
